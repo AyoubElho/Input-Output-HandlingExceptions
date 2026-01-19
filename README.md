@@ -1,236 +1,121 @@
-# Getting into Practice – Java OOP & Exceptions
+## 📘 TP Java – Input / Output & Exception Handling
+
+This practical work focuses on strengthening fundamental Java skills related to **Input/Output**, **object serialization**, and **exception handling** through a set of structured exercises.
 
 ---
 
-## 📘 OOP in Java – Loubna Aminou (2025/2026)
+## 🟦 PART 1: Practice with Input / Output
 
----
+### 🔹 Exercise 1: Simulating the `ls` Command
 
-## 🟢 Exercice 1: Simulate the `ls` command
+#### 🧩 Problem Description
 
-**Goal:** Simulate the Linux `ls` command using Java. The program lists files and directories of a given path.
+The objective of this exercise is to create a Java program that **simulates the Linux `ls` command**.
 
-**Requirements:**
+The program must:
 
-- User enters a directory path
-- Display:
-  - `<DIR>` for directories
-  - `<FILE>` for files
-  - Permissions:
+- Ask the user to enter the **absolute path of a directory**
+- Display all files and subdirectories contained in the given directory
+- Indicate for each element:
+  - `<DIR>` if it is a directory
+  - `<FILE>` if it is a file
+  - Access permissions:
     - `r` → readable
     - `w` → writable
     - `h` → hidden
 
-**Example output:**
+#### 💡 Solution Overview
 
-```
-..\\xampp\\htdocs\\tp1\\index.php <FILE> rw-
-..\\xampp\\htdocs\\tp1\\images <DIR> rw-
-```
+This solution relies on the `java.io.File` class to explore directory content and retrieve file properties using built-in methods such as `isDirectory()`, `canRead()`, and `isHidden()`.
 
-### ✅ Solution (Java)
+#### ▶️ Program Execution
 
-```java
-import java.io.File;
-import java.util.Scanner;
-
-public class LsSimulation {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter directory path: ");
-        String path = sc.nextLine();
-
-        File dir = new File(path);
-        if (!dir.exists() || !dir.isDirectory()) {
-            System.out.println("Invalid directory");
-            return;
-        }
-
-        for (File f : dir.listFiles()) {
-            System.out.print(f.getAbsolutePath() + " ");
-            System.out.print(f.isDirectory() ? "<DIR> " : "<FILE> ");
-            System.out.print(f.canRead() ? "r" : "-");
-            System.out.print(f.canWrite() ? "w" : "-");
-            System.out.println(f.isHidden() ? "h" : "-");
-        }
-    }
-}
-```
+<img width="1188" height="527" alt="Program execution - ls simulation" src="https://github.com/user-attachments/assets/c3c9c2a2-a1ae-4c2a-b68f-bde95bbcc796" />
 
 ---
 
-## 🟢 Exercise 2: Object Serialization (`products.dat`)
+## 🟩 PART 2: Object Serialization – `products.dat`
 
-**Goal:** Save and load a list of `Product` objects using Java serialization.
+### 🔹 Exercise 2: Product Management System
 
-### ✅ Product class
+#### 🧩 Problem Description
 
-```java
-import java.io.Serializable;
+This exercise involves developing a Java application that **manages a list of products** and **persists data using object serialization**.
 
-public class Product implements Serializable {
-    private long id;
-    private String name, brand, description;
-    private double price;
-    private int stock;
+Each product is defined by the following attributes:
 
-    public Product(long id, String name, String brand, double price, String description, int stock) {
-        this.id = id;
-        this.name = name;
-        this.brand = brand;
-        this.price = price;
-        this.description = description;
-        this.stock = stock;
-    }
+- id
+- name
+- brand
+- price
+- description
+- quantity in stock
 
-    public long getId() { return id; }
+The application provides a menu allowing the user to:
 
-    public String toString() {
-        return id + " | " + name + " | " + brand + " | " + price + " | " + stock;
-    }
-}
-```
+1. Display all products
+2. Search for a product by its ID
+3. Add a new product
+4. Delete a product by its ID
+5. Save products to `products.dat`
+6. Exit the application
 
-### ✅ IProduitMetier Interface
+#### 💡 Solution Overview
 
-```java
-import java.util.List;
+Serialization is implemented using `ObjectOutputStream` and `ObjectInputStream`. The design follows object-oriented principles using interfaces and implementation classes.
 
-public interface IProduitMetier {
-    void add(Product p);
-    List<Product> getAll();
-    Product findById(long id);
-    void delete(long id);
-    void saveAll();
-}
-```
+#### ▶️ Program Execution
 
-### ✅ MetierProduitImpl
-
-```java
-import java.io.*;
-import java.util.*;
-
-public class MetierProduitImpl implements IProduitMetier {
-    private List<Product> products = new ArrayList<>();
-    private String fileName;
-
-    public MetierProduitImpl(String fileName) {
-        this.fileName = fileName;
-        load();
-    }
-
-    private void load() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
-            products = (List<Product>) ois.readObject();
-        } catch (Exception e) {
-            products = new ArrayList<>();
-        }
-    }
-
-    public void add(Product p) { products.add(p); }
-    public List<Product> getAll() { return products; }
-
-    public Product findById(long id) {
-        return products.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
-    }
-
-    public void delete(long id) {
-        products.removeIf(p -> p.getId() == id);
-    }
-
-    public void saveAll() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) {
-            oos.writeObject(products);
-        } catch (IOException e) {
-            System.out.println("Save error");
-        }
-    }
-}
-```
+<img width="917" height="256" alt="Product management execution" src="https://github.com/user-attachments/assets/2934c11d-e7a7-4b97-835b-3e1067639a6d" />
 
 ---
 
-## 🟢 Handling Exceptions – Calculator
+## 🟨 PART 3: Exception Handling Practice
 
-### ✅ Calculator class
+### 🔹 Exercise 1: Calculator Error Handling
 
-```java
-public class Calculator {
-    public static double divide(double a, double b) {
-        if (b == 0) {
-            System.out.println("Error: Division by zero not possible.");
-            return 0;
-        }
-        return a / b;
-    }
+#### 🧩 Problem Description
 
-    public static int convertToNumber(String text) {
-        try {
-            return Integer.parseInt(text);
-        } catch (NumberFormatException e) {
-            System.out.println("Error: '" + text + "' is not a valid number");
-            return 0;
-        }
-    }
+Create a `Calculator` class capable of:
 
-    public static double calculate(char op, double a, double b) {
-        switch (op) {
-            case '+': return a + b;
-            case '-': return a - b;
-            case '*': return a * b;
-            case '/': return divide(a, b);
-            default:
-                System.out.println("Error: Operation '" + op + "' not supported");
-                return 0;
-        }
-    }
-}
-```
+- Performing arithmetic operations (`+`, `-`, `*`, `/`)
+- Handling division by zero
+- Converting string inputs into numbers
+
+The program must display **clear and user-friendly error messages** when exceptions occur.
+
+#### 💡 Solution Overview
+
+The solution uses `try / catch` blocks to handle `ArithmeticException` and `NumberFormatException`, ensuring safe and robust execution.
+
+#### ▶️ Program Execution
+
+<img width="735" height="382" alt="Calculator execution" src="https://github.com/user-attachments/assets/ae35a8f7-861c-4d64-bb59-e79e2e2f61af" />
 
 ---
 
-## 🟢 Custom Exception – Vehicle Speed
+### 🔹 Exercise 2: Custom Exception – `TooFastException`
 
-### ✅ TooFastException
+#### 🧩 Problem Description
 
-```java
-public class TooFastException extends Exception {
-    public TooFastException(int speed) {
-        super("This is an exception of type TooFastException. Speed involved: " + speed);
-    }
-}
-```
+Create a custom exception named `TooFastException`, which is thrown when a vehicle exceeds a speed of **90 km/h**.
 
-### ✅ Vehicle class (with main)
+#### 💡 Solution Overview
 
-```java
-public class Vehicle {
+- Define a custom exception class extending `Exception`
+- Implement a `Vehicle` class with a speed-checking method
+- Throw the exception when the speed limit is exceeded
+- Display the stack trace for debugging purposes
 
-    public Vehicle() {}
+#### ▶️ Program Execution
 
-    public void testSpeed(int speed) throws TooFastException {
-        if (speed > 90) {
-            throw new TooFastException(speed);
-        }
-        System.out.println("Speed OK: " + speed);
-    }
-
-    public static void main(String[] args) {
-        Vehicle v = new Vehicle();
-        try {
-            v.testSpeed(70);
-            v.testSpeed(120);
-        } catch (TooFastException e) {
-            e.printStackTrace();
-        }
-    }
-}
-```
+<img width="1347" height="197" alt="TooFastException execution" src="https://github.com/user-attachments/assets/8ce80f52-3e12-495d-bd15-aa8269a37f19" />
 
 ---
 
-## ✅ End of Practice
+## ✅ Conclusion
 
-Good luck 🍀 — This README can be used directly in GitHub or a project folder.
+This TP provided hands-on experience with Java file handling, serialization, and exception management, while reinforcing clean code structure and object-oriented design principles.
+
+**Academic Year:** 2025–2026
 
